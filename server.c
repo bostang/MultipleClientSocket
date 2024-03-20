@@ -28,6 +28,7 @@ EL4236 Perancangan Perangkat Lunak Jaringan 2023/2024
 int flag_kirim = 1;
 int PORT_CLIENT1;
 int PORT_CLIENT2;
+int client[2] = {0,0}; // client[0] = 1 menyatakan posisi client1 sudah ditempati
 
 // INISIASI FUNGSI
 void response(char*buff, char* input);
@@ -78,8 +79,6 @@ int main()
         printf("[-]Error in binding.\n");
     }
 
-    int clientCount = 0; // Variabel jumlah client yang tersambung (dibatasi 2)
-
     while(1)
     {
         newSocket = accept(sockfd, (struct sockaddr*)&newAddr, &addr_size);
@@ -87,19 +86,23 @@ int main()
         {
             exit(1);
         }
-        clientCount++;
         flag_kirim = 1;
         printf("Connection accepted from %s:%d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
 
-        if(clientCount == 1)
+            // jika posisi client#1 belum ditempati
+        if(client[0] == 0)
         {
             printf("Assigning client1 to port %d\n", ntohs(newAddr.sin_port));
             PORT_CLIENT1 = ntohs(newAddr.sin_port);
+            client[0] = 1;
             // Handle client1
-        } else if(clientCount == 2)
+        }
+        // jika posisi client#1 sudah ditempati dan client#2 belum ditempati
+        else if(client[1] == 0)
         {
             printf("Assigning client2 to port %d\n", ntohs(newAddr.sin_port));
             PORT_CLIENT2 = ntohs(newAddr.sin_port);
+            client[1] = 1;
             // Handle client2
         } else
         {
@@ -124,12 +127,13 @@ int main()
                         if (ntohs(newAddr.sin_port) == PORT_CLIENT1)
                         {
                             printf("Client1 Memutus koneksi...\n");
+                            client[0] = 0;
                         }
                         else if (ntohs(newAddr.sin_port) == PORT_CLIENT2)
                         {
                             printf("Client2 Memutus koneksi...\n");
+                            client[1] = 0;
                         }
-                        clientCount--;
                     }
                     else
                     {
