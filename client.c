@@ -7,7 +7,7 @@ EL4236 Perancangan Perangkat Lunak Jaringan 2023/2024
 *Nama File        : client.c
 *Deskripsi        : sourcecode client untuk program komunikasi TCP socket
 *Programmer       : Bostang Palaguna
-*Referensi        : https://github.com/bostang/ServerClientSocket/blob/main/server.c
+*Referensi        : https://github.com/nikhilroxtomar/Multiple-Client-Server-Program-in-C-using-fork
 */
 
 #include <stdio.h>

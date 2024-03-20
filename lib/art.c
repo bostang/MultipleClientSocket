@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "art.h"
+#include "var.h"
 
 void cetakBanner()
 {
