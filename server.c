@@ -10,164 +10,85 @@ EL4236 Perancangan Perangkat Lunak Jaringan 2023/2024
 *Referensi        : https://github.com/bostang/ServerClientSocket/blob/main/server.c
 */
 
-// C program for the Server Side
-
-// inet_addr
-#include <arpa/inet.h>
-
-// For threading, link with lpthread
-#include <pthread.h>
-#include <semaphore.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
 #include <unistd.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include "./lib/art.c"
 
-// Semaphore variables
-sem_t x, y;
-pthread_t tid;
-pthread_t writerthreads[100];
-pthread_t readerthreads[100];
-int readercount = 0;
+#define PORT 4444
 
-// Reader Function
-void* reader(void* param)
-{
-	// Lock the semaphore
-	sem_wait(&x);
-	readercount++;
+int main(){
+	cetakBanner();
 
-	if (readercount == 1)
-		sem_wait(&y);
+	int sockfd, ret;
+	 struct sockaddr_in serverAddr;
 
-	// Unlock the semaphore
-	sem_post(&x);
-
-	printf("\n%d reader is inside",
-		readercount);
-
-	sleep(5);
-
-	// Lock the semaphore
-	sem_wait(&x);
-	readercount--;
-
-	if (readercount == 0) {
-		sem_post(&y);
-	}
-
-	// Lock the semaphore
-	sem_post(&x);
-
-	printf("\n%d Reader is leaving",
-		readercount + 1);
-	pthread_exit(NULL);
-}
-
-// Writer Function
-void* writer(void* param)
-{
-	printf("\nWriter is trying to enter");
-
-	// Lock the semaphore
-	sem_wait(&y);
-
-	printf("\nWriter has entered");
-
-	// Unlock the semaphore
-	sem_post(&y);
-
-	printf("\nWriter is leaving");
-	pthread_exit(NULL);
-}
-
-// Driver Code
-int main()
-{
-	// Initialize variables
-	int serverSocket, newSocket;
-	struct sockaddr_in serverAddr;
-	struct sockaddr_storage serverStorage;
+	int newSocket;
+	struct sockaddr_in newAddr;
 
 	socklen_t addr_size;
-	sem_init(&x, 0, 1);
-	sem_init(&y, 0, 1);
 
-	serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-	serverAddr.sin_addr.s_addr = INADDR_ANY;
-	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_port = htons(8989);
+	char buffer[1024];
+	pid_t childpid;
 
-	// Bind the socket to the
-	// address and port number.
-	bind(serverSocket,
-		(struct sockaddr*)&serverAddr,
-		sizeof(serverAddr));
-
-	// Listen on the socket,
-	// with 40 max connection
-	// requests queued
-	if (listen(serverSocket, 50) == 0)
-		printf("Listening\n");
-	else
-		printf("Error\n");
-
-	// Array for thread
-	pthread_t tid[60];
-
-	int i = 0;
-
-	while (1) {
-		addr_size = sizeof(serverStorage);
-
-		// Extract the first
-		// connection in the queue
-		newSocket = accept(serverSocket,
-						(struct sockaddr*)&serverStorage,
-						&addr_size);
-		int choice = 0;
-		recv(newSocket,
-			&choice, sizeof(choice), 0);
-
-		if (choice == 1) {
-			// Creater readers thread
-			if (pthread_create(&readerthreads[i++], NULL,
-							reader, &newSocket)
-				!= 0)
-
-				// Error in creating thread
-				printf("Failed to create thread\n");
-		}
-		else if (choice == 2) {
-			// Create writers thread
-			if (pthread_create(&writerthreads[i++], NULL,
-							writer, &newSocket)
-				!= 0)
-
-				// Error in creating thread
-				printf("Failed to create thread\n");
-		}
-
-		if (i >= 50) {
-			// Update i
-			i = 0;
-
-			while (i < 50) {
-				// Suspend execution of
-				// the calling thread
-				// until the target
-				// thread terminates
-				pthread_join(writerthreads[i++],
-							NULL);
-				pthread_join(readerthreads[i++],
-							NULL);
-			}
-
-			// Update i
-			i = 0;
-		}
+	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	if(sockfd < 0){
+		printf("[-]Error in connection.\n");
+		exit(1);
 	}
+	printf("[+]Server Socket is created.\n");
+
+	memset(&serverAddr, '\0', sizeof(serverAddr));
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_port = htons(PORT);
+	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+	ret = bind(sockfd, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
+	if(ret < 0){
+		printf("[-]Error in binding.\n");
+		exit(1);
+	}
+	printf("[+]Bind to port %d\n", 4444);
+
+	if(listen(sockfd, 10) == 0){
+		printf("[+]Listening....\n");
+	}else{
+		printf("[-]Error in binding.\n");
+	}
+
+
+	while(1){
+		newSocket = accept(sockfd, (struct sockaddr*)&newAddr, &addr_size);
+		if(newSocket < 0){
+			exit(1);
+		}
+		printf("Connection accepted from %s:%d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
+
+		if((childpid = fork()) == 0){
+			close(sockfd);
+
+			while(1){
+				recv(newSocket, buffer, 1024, 0);
+				if(strcmp(buffer, ":exit") == 0){
+					printf("Disconnected from %s:%d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
+					break;
+				}else{
+					printf("Client: %s\n", buffer);
+					send(newSocket, buffer, strlen(buffer), 0);
+					bzero(buffer, sizeof(buffer));
+				}
+			}
+		}
+
+	}
+
+	close(newSocket);
+
 
 	return 0;
 }

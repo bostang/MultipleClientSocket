@@ -1,4 +1,5 @@
 # MultipleClientSocket
+
 Melakukan komunikasi socket antara satu buah server dengan dua buah client menggunakan socket programming. Server diimplementasikan dalam bahasa C. Client diimplementasikan dalam bahasa Python dan C++
 
 Anggota :
@@ -6,7 +7,7 @@ Anggota :
 1. Bostang Palaguna (13220055)
 2. Karma Kunga (13220028)
 3. Emmanuella Pramudita Rumanti (13220031)
-   
+
 ## Perintah
 
 Buatlah simulasi komunikasi antara dua buah _client_ dengan satu buah _server_ dengan pemrograman socket. Setiap _client_ dan _server_ dibuat dengan bahasa pemrograman yang berbeda.
@@ -35,6 +36,12 @@ Client2 Memutus koneksi...
 Client1 : Selesai
 Client1 Memutus koneksi...
 ```
+
+## Direktori Repositori
+
+folder `bin berisikan file executable hasil kompilasi (untuk kode yang dibuat dalam bahasa C).`
+
+folder `ref` berisikan kumpulan repositori yang dijadikan referensi untuk mengerjakan tugas ini.
 
 ## Penjelasan
 
