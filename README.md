@@ -12,28 +12,28 @@ Anggota :
 
 Buatlah simulasi komunikasi antara dua buah _client_ dengan satu buah _server_ dengan pemrograman socket. Setiap _client_ dan _server_ dibuat dengan bahasa pemrograman yang berbeda.
 
-Contoh skenario:
+### **Contoh skenario**
 
-```
-Client1 : nama1
+```C
+Client1 (Port): nama1
 Server : Karma Kunga
-Client1 : NIM1
+Client1 (Port): NIM1
 Server : 13220028
-Client1 : nama2
+Client1 (Port): nama2
 Server : Bostang Palaguna
-Client1 : NIM2
+Client1 (Port): NIM2
 Server : 13220055
-Client2 : nama3
+Client2 (Port): nama3
 Server : Emmanuella Pramudita Rumanti
-Client2 : NIM3
+Client2 (Port): NIM3
 Server : 13220031
-Client1 : xyz
+Client1 (Port): xyz
 Server : Perintah tidak diketahui
-Client2 : abc
+Client2 (Port): abc
 Server : Perintah tidak diketahui
-Client2 : Selesai
+Client2 (Port): Selesai
 Client2 Memutus koneksi...
-Client1 : Selesai
+Client1 (Port): Selesai
 Client1 Memutus koneksi...
 ```
 

@@ -138,7 +138,7 @@ int main()
 
                 response(buffer, buffer); // Menghasilkan respons berdasarkan input dari client
                 send(newSocket, buffer, strlen(buffer), 0); // Mengirim respons ke client
-                printf("Response sent to %s:%d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
+                printf("Server: %s\n",buffer);
             }
             bzero(buffer, sizeof(buffer));
         }
