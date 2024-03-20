@@ -10,6 +10,7 @@ EL4236 Perancangan Perangkat Lunak Jaringan 2023/2024
 *Referensi        : https://github.com/nikhilroxtomar/Multiple-Client-Server-Program-in-C-using-fork
 */
 
+// INCLUDE LIBRARY
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,16 +20,19 @@ EL4236 Perancangan Perangkat Lunak Jaringan 2023/2024
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+// DEKLARASI KONSTANTA
 #define PORT 4567
 
-int main(){
-
+int main()
+{
+    // setup client
 	int clientSocket, ret;
 	struct sockaddr_in serverAddr;
 	char buffer[1024];
 
 	clientSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if(clientSocket < 0){
+	if(clientSocket < 0)
+	{
 		printf("[-]Error in connection.\n");
 		exit(1);
 	}
@@ -40,7 +44,8 @@ int main(){
 	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
 	ret = connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
-	if(ret < 0){
+	if(ret < 0)
+	{
 		printf("[-]Error in connection.\n");
 		exit(1);
 	}
@@ -48,10 +53,12 @@ int main(){
 
 	while(1)
 	{
+		// menerima pesan dari client
 		printf("Client: ");
 		scanf("%s", &buffer[0]);
 		send(clientSocket, buffer, strlen(buffer), 0);
 
+		// jika client ingin dis-connect dari server
 		if(strcmp(buffer, "selesai") == 0)
 		{
 			close(clientSocket);

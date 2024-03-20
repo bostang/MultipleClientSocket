@@ -26,9 +26,8 @@ EL4236 Perancangan Perangkat Lunak Jaringan 2023/2024
 
 // DEKLARASI VARIABEL
 int flag_kirim = 1;
-int PORT_CLIENT1;
-int PORT_CLIENT2;
-int client[2] = {0,0}; // client[0] = 1 menyatakan posisi client1 sudah ditempati
+int PORT_CLIENT[40]; // maksimum menampung 40 client
+int nClient = 0; // menyatakan banyaknya client
 
 // INISIASI FUNGSI
 void response(char*buff, char* input);
@@ -89,22 +88,11 @@ int main()
         flag_kirim = 1;
         printf("Connection accepted from %s:%d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
 
-            // jika posisi client#1 belum ditempati
-        if(client[0] == 0)
-        {
-            printf("Assigning client1 to port %d\n", ntohs(newAddr.sin_port));
-            PORT_CLIENT1 = ntohs(newAddr.sin_port);
-            client[0] = 1;
-            // Handle client1
-        }
-        // jika posisi client#1 sudah ditempati dan client#2 belum ditempati
-        else if(client[1] == 0)
-        {
-            printf("Assigning client2 to port %d\n", ntohs(newAddr.sin_port));
-            PORT_CLIENT2 = ntohs(newAddr.sin_port);
-            client[1] = 1;
-            // Handle client2
-        } else
+        PORT_CLIENT[nClient] = ntohs(newAddr.sin_port);
+        printf("Assigning client%d to port %d\n",nClient+1,ntohs(newAddr.sin_port));
+        nClient++;
+            
+        if (nClient > 40)
         {
             printf("Maximum number of clients reached. Connection from %s:%d rejected.\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
             close(newSocket);
@@ -124,36 +112,26 @@ int main()
                     if (strcmp(buffer,"selesai") == 0)
                     {
                         flag_kirim = 0;
-                        if (ntohs(newAddr.sin_port) == PORT_CLIENT1)
+                        // memeriksa client nomor berapa yang keluar
+                        for (int i = 0;i<40;i++)
                         {
-                            printf("Client1 Memutus koneksi...\n");
-                            client[0] = 0;
-                        }
-                        else if (ntohs(newAddr.sin_port) == PORT_CLIENT2)
-                        {
-                            printf("Client2 Memutus koneksi...\n");
-                            client[1] = 0;
+                            if (ntohs(newAddr.sin_port) == PORT_CLIENT[i])
+                            {
+                                printf("Client%d Memutus koneksi...\n",i+1);
+                            }
                         }
                     }
                     else
                     {
-                        // memproses pesan dari client1 / client2
-                        if (ntohs(newAddr.sin_port) == PORT_CLIENT1)
+                        // memeriksa client nomor berapa yang mengirim pesan
+                        for (int i = 0;i<40;i++)
                         {
-                            printf("Client1 (%s:%d): %s\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port), buffer);
-                            
+                            if (ntohs(newAddr.sin_port) == PORT_CLIENT[i])
+                            {
+                                printf("Client%d (%s:%d): %s\n",i+1, inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port), buffer);
+                            }
+    
                         }
-                        else if (ntohs(newAddr.sin_port) == PORT_CLIENT2)
-                        {
-                            printf("Client2 (%s:%d): %s\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port), buffer);
-                            // Process message from client2
-                        }
-                        else
-                        {
-                            printf("Unknown client (%s:%d): %s\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port), buffer);
-                            // Handle unknown client or error condition
-                        }
-
                         response(buffer, buffer); // Menghasilkan respons berdasarkan input dari client
                         send(newSocket, buffer, strlen(buffer), 0); // Mengirim respons ke client
                         printf("Server: %s\n",buffer);
