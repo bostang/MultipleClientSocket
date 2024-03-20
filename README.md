@@ -213,6 +213,6 @@ if(recv(clientSocket, buffer, 1024, 0) < 0){
 
 ## Demonstrasi
 
-Berikut adalah demonstrasi dari komunikasi  antara server (C) dengan dua buah client (python dan C++).
+Berikut adalah demonstrasi dari komunikasi  antara server (C) dengan dua buah client yang dibuat dalma bahasa python. Namun untuk implementasi client dalam bahasa python dan C++ memiliki gambaran demo yang kurang lebih sama.
 
-> belum dibuat
+![Demo](./img/demo.gif)
