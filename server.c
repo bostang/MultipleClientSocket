@@ -10,6 +10,7 @@ EL4236 Perancangan Perangkat Lunak Jaringan 2023/2024
 *Referensi        : https://github.com/bostang/ServerClientSocket/blob/main/server.c
 */
 
+// INCLUDE LIBRARY
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,21 +21,25 @@ EL4236 Perancangan Perangkat Lunak Jaringan 2023/2024
 #include <arpa/inet.h>
 #include "./lib/art.c"
 
+// DEKLARASI KONSTANTA
 #define PORT 4567
 
+// DEKLARASI VARIABEL
+int flag_kirim = 1;
 int PORT_CLIENT1;
 int PORT_CLIENT2;
 
 // INISIASI FUNGSI
 void response(char*buff, char* input);
 
-// int flag_kirim = 1;
 
 // ALGORITMA UTAMA
 int main()
 {
+    // mencetak banner awal program (server)
     cetakBanner();
 
+    // setup server
     int sockfd, ret;
     struct sockaddr_in serverAddr;
 
@@ -73,81 +78,88 @@ int main()
         printf("[-]Error in binding.\n");
     }
 
-    int clientCount = 0; // Variable to count the number of connected clients
+    int clientCount = 0; // Variabel jumlah client yang tersambung (dibatasi 2)
 
-    while(1){
+    while(1)
+    {
         newSocket = accept(sockfd, (struct sockaddr*)&newAddr, &addr_size);
-        if(newSocket < 0){
+        if(newSocket < 0)
+        {
             exit(1);
         }
         clientCount++;
+        flag_kirim = 1;
         printf("Connection accepted from %s:%d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
 
-        if(clientCount == 1) {
+        if(clientCount == 1)
+        {
             printf("Assigning client1 to port %d\n", ntohs(newAddr.sin_port));
             PORT_CLIENT1 = ntohs(newAddr.sin_port);
             // Handle client1
-        } else if(clientCount == 2) {
+        } else if(clientCount == 2)
+        {
             printf("Assigning client2 to port %d\n", ntohs(newAddr.sin_port));
             PORT_CLIENT2 = ntohs(newAddr.sin_port);
             // Handle client2
-        } else {
+        } else
+        {
             printf("Maximum number of clients reached. Connection from %s:%d rejected.\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
             close(newSocket);
             continue;
         }
 
-        if((childpid = fork()) == 0){
+        if((childpid = fork()) == 0)
+        {
             close(sockfd);
 
-        while(1)
-        {
-            recv(newSocket, buffer, 1024, 0);
- 
-            if (strcmp(buffer,"selesai") == 0)
+            while(1)
             {
-                if (ntohs(newAddr.sin_port) == PORT_CLIENT1)
+                if (flag_kirim) // bernilai salah apabila baru ada client yang disconnect
                 {
-                    printf("Client1 Memutus koneksi...\n");
+                    recv(newSocket, buffer, 1024, 0);
+                    // apabila ada client yang ingin disconnect
+                    if (strcmp(buffer,"selesai") == 0)
+                    {
+                        flag_kirim = 0;
+                        if (ntohs(newAddr.sin_port) == PORT_CLIENT1)
+                        {
+                            printf("Client1 Memutus koneksi...\n");
+                        }
+                        else if (ntohs(newAddr.sin_port) == PORT_CLIENT2)
+                        {
+                            printf("Client2 Memutus koneksi...\n");
+                        }
+                        clientCount--;
+                    }
+                    else
+                    {
+                        // memproses pesan dari client1 / client2
+                        if (ntohs(newAddr.sin_port) == PORT_CLIENT1)
+                        {
+                            printf("Client1 (%s:%d): %s\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port), buffer);
+                            
+                        }
+                        else if (ntohs(newAddr.sin_port) == PORT_CLIENT2)
+                        {
+                            printf("Client2 (%s:%d): %s\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port), buffer);
+                            // Process message from client2
+                        }
+                        else
+                        {
+                            printf("Unknown client (%s:%d): %s\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port), buffer);
+                            // Handle unknown client or error condition
+                        }
 
-                }
-                else if (ntohs(newAddr.sin_port) == PORT_CLIENT2)
-                {
-                    printf("Client2 Memutus koneksi...\n");
+                        response(buffer, buffer); // Menghasilkan respons berdasarkan input dari client
+                        send(newSocket, buffer, strlen(buffer), 0); // Mengirim respons ke client
+                        printf("Server: %s\n",buffer);
+                    }
+                    bzero(buffer, sizeof(buffer));
                 }
             }
-            else
-            {
-                if (ntohs(newAddr.sin_port) == PORT_CLIENT1)
-                {
-                    printf("Client1 (%s:%d): %s\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port), buffer);
-                    // Process message from client1
-                }
-                else if (ntohs(newAddr.sin_port) == PORT_CLIENT2)
-                {
-                    printf("Client2 (%s:%d): %s\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port), buffer);
-                    // Process message from client2
-                }
-                else
-                {
-                    printf("Unknown client (%s:%d): %s\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port), buffer);
-                    // Handle unknown client or error condition
-                }
-
-                // send(newSocket, buffer, strlen(buffer), 0);
-
-                response(buffer, buffer); // Menghasilkan respons berdasarkan input dari client
-                send(newSocket, buffer, strlen(buffer), 0); // Mengirim respons ke client
-                printf("Server: %s\n",buffer);
-            }
-            bzero(buffer, sizeof(buffer));
         }
     }
-
-}
-
     close(newSocket);
-
     return 0;
 }
 
