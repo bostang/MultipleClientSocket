@@ -19,7 +19,7 @@ EL4236 Perancangan Perangkat Lunak Jaringan 2023/2024
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define PORT 4444
+#define PORT 4567
 
 int main(){
 
@@ -46,21 +46,25 @@ int main(){
 	}
 	printf("[+]Connected to Server.\n");
 
-	while(1){
-		printf("Client: \t");
+	while(1)
+	{
+		printf("Client: ");
 		scanf("%s", &buffer[0]);
 		send(clientSocket, buffer, strlen(buffer), 0);
 
-		if(strcmp(buffer, ":exit") == 0){
+		if(strcmp(buffer, "selesai") == 0)
+		{
 			close(clientSocket);
 			printf("[-]Disconnected from server.\n");
 			exit(1);
 		}
 
+		bzero(buffer, sizeof(buffer));
+
 		if(recv(clientSocket, buffer, 1024, 0) < 0){
 			printf("[-]Error in receiving data.\n");
 		}else{
-			printf("Server: \t%s\n", buffer);
+			printf("Server: %s\n", buffer);
 		}
 	}
 

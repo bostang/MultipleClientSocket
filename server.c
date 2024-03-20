@@ -20,12 +20,19 @@ EL4236 Perancangan Perangkat Lunak Jaringan 2023/2024
 #include <arpa/inet.h>
 #include "./lib/art.c"
 
-#define PORT 4444
+#define PORT 4567
 
 int PORT_CLIENT1;
 int PORT_CLIENT2;
 
-int main(){
+// INISIASI FUNGSI
+void response(char*buff, char* input);
+
+// int flag_kirim = 1;
+
+// ALGORITMA UTAMA
+int main()
+{
     cetakBanner();
 
     int sockfd, ret;
@@ -58,9 +65,11 @@ int main(){
     }
     printf("[+]Bind to port %d\n", PORT);
 
-    if(listen(sockfd, 10) == 0){
+    if(listen(sockfd, 10) == 0)
+    {
         printf("[+]Listening....\n");
-    }else{
+    }else
+    {
         printf("[-]Error in binding.\n");
     }
 
@@ -91,32 +100,86 @@ int main(){
         if((childpid = fork()) == 0){
             close(sockfd);
 
-        while(1){
+        while(1)
+        {
             recv(newSocket, buffer, 1024, 0);
-            if(strcmp(buffer, ":exit") == 0){
-                printf("Disconnected from %s:%d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
-                break;
-            } else {
-                if (ntohs(newAddr.sin_port) == PORT_CLIENT1) {
+ 
+            if (strcmp(buffer,"selesai") == 0)
+            {
+                if (ntohs(newAddr.sin_port) == PORT_CLIENT1)
+                {
+                    printf("Client1 Memutus koneksi...\n");
+
+                }
+                else if (ntohs(newAddr.sin_port) == PORT_CLIENT2)
+                {
+                    printf("Client2 Memutus koneksi...\n");
+                }
+            }
+            else
+            {
+                if (ntohs(newAddr.sin_port) == PORT_CLIENT1)
+                {
                     printf("Client1 (%s:%d): %s\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port), buffer);
                     // Process message from client1
-                } else if (ntohs(newAddr.sin_port) == PORT_CLIENT2) {
+                }
+                else if (ntohs(newAddr.sin_port) == PORT_CLIENT2)
+                {
                     printf("Client2 (%s:%d): %s\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port), buffer);
                     // Process message from client2
-                } else {
+                }
+                else
+                {
                     printf("Unknown client (%s:%d): %s\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port), buffer);
                     // Handle unknown client or error condition
                 }
-                send(newSocket, buffer, strlen(buffer), 0);
-                bzero(buffer, sizeof(buffer));
+
+                // send(newSocket, buffer, strlen(buffer), 0);
+
+                response(buffer, buffer); // Menghasilkan respons berdasarkan input dari client
+                send(newSocket, buffer, strlen(buffer), 0); // Mengirim respons ke client
+                printf("Response sent to %s:%d\n", inet_ntoa(newAddr.sin_addr), ntohs(newAddr.sin_port));
             }
+            bzero(buffer, sizeof(buffer));
         }
-
-        }
-
     }
+
+}
 
     close(newSocket);
 
     return 0;
+}
+
+void response(char*buff, char* input)
+{
+    if (strcmp(input,"nama1") == 0)
+    {
+        strcpy(buff,nama_developer1);
+    }
+    else if (strcmp(input,"nama2") == 0)
+    {
+        strcpy(buff,nama_developer2);
+    }
+    else if (strcmp(input,"nama3") == 0)
+    {
+        strcpy(buff,nama_developer3);
+    }
+    else if (strcmp(input,"NIM1") == 0)
+    {
+        strcpy(buff,NIM_developer1);
+    }
+    else if (strcmp(input,"NIM2") == 0)
+    {
+        strcpy(buff,NIM_developer2);
+    }
+    else if (strcmp(input,"NIM3") == 0)
+    {
+        strcpy(buff,NIM_developer3);
+    }
+        // selain isi buffer di atas, maka akan ditampilkan pesan error 
+    else
+    {
+        strcpy(buff,"Perintah tidak diketahui");
+    }
 }
