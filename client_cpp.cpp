@@ -5,17 +5,19 @@ EL4236 Perancangan Perangkat Lunak Jaringan 2023/2024
 *Nama (NIM) 2     : Bostang Palaguna (13220055)
 *Nama (NIM) 3     : Emmanuella Pramudita Rumanti (13220031)
 *Nama File        : client_cpp.cpp
-*Deskripsi        : Source code client untuk program komunikasi TCP socket
+*Deskripsi        : Source code client untuk program komunikasi TCP socket (C++ version)
 *Programmer       : Emmanuella Rumanti
 *Referensi        : https://learn.microsoft.com/en-us/windows/win32/winsock/complete-client-code
 */
 
 // Compile: g++ client_cpp.cpp -o client_cpp -lws2_32
 
+#define DEFAULT_ADDR "10.6.101.147"
+#define DEFAULT_PORT "4568"
+
 #define WIN32_LEAN_AND_MEAN
 #define _WIN32_WINNT 0x501
-#define DEFAULT_BUFLEN 512
-#define DEFAULT_PORT "27015"
+#define DEFAULT_BUFLEN 2048
 
 #include <windows.h>
 #include <winsock2.h>
@@ -24,10 +26,9 @@ EL4236 Perancangan Perangkat Lunak Jaringan 2023/2024
 #include <stdio.h>
 
 #pragma comment (lib, "Ws2_32.lib")
-#pragma comment (lib, "Mswsock.lib")
+#pragma comment (lib, "Mswsock.lib")s
 #pragma comment (lib, "AdvApi32.lib")
 
-#define PORT "4567"
 
 int __cdecl main(int argc, char **argv) {
 
@@ -38,7 +39,7 @@ int __cdecl main(int argc, char **argv) {
                     *ptr = NULL,
                     hints;
 
-    const char *sendbuf = "Default";
+    char sendbuf[DEFAULT_BUFLEN];
     char recvbuf[DEFAULT_BUFLEN];
     int iResult;
     int recvbuflen = DEFAULT_BUFLEN;
@@ -58,7 +59,7 @@ int __cdecl main(int argc, char **argv) {
     printf("[+]Client Socket is created.\n");
 
     // Resolve the server address and port
-    iResult = getaddrinfo(PORT, DEFAULT_PORT, &hints, &result);
+    iResult = getaddrinfo(DEFAULT_ADDR, DEFAULT_PORT, &hints, &result);
     if ( iResult != 0 ) {
         printf("getaddrinfo failed with error: %d\n", iResult);
         WSACleanup();
@@ -100,24 +101,25 @@ int __cdecl main(int argc, char **argv) {
 
     printf("[+]Connected to Server.\n");
 
-    while(1) {
+    while (1) {
         // menerima pesan dari client
         printf("Client: ");
         scanf("%s", &sendbuf);
+
         iResult = send( ConnectSocket, sendbuf, (int)strlen(sendbuf), 0 );
+        //printf("bytes: %d", iResult);
 
         if (strcmp(sendbuf, "selesai") == 0) {
+            printf("[-] Disconnected from server.\n");
             closesocket(ConnectSocket);
             WSACleanup();
-            printf("[-] Disconnected from server.\n");
             exit(1);
         }
 
-        char recvbuf[1024];
         if (recv(ConnectSocket, recvbuf, 1024, 0) < 0) {
             printf("[-]Error in receiving data.\n");
         } else {
-            printf("Server: %s\n", recvbuf);
+            printf("\nServer: %s\n", recvbuf);
         }
     }
 
