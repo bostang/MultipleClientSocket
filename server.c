@@ -7,7 +7,7 @@ EL4236 Perancangan Perangkat Lunak Jaringan 2023/2024
 *Nama File        : server.c
 *Deskripsi        : sourcecode server untuk program komunikasi TCP socket
 *Programmer       : Bostang Palaguna
-*Referensi        : https://github.com/bostang/ServerClientSocket/blob/main/server.c
+*Referensi        :https://github.com/nikhilroxtomar/Multiple-Client-Server-Program-in-C-using-fork
 */
 
 // INCLUDE LIBRARY
@@ -59,9 +59,17 @@ int main()
     printf("[+]Server Socket is created.\n");
 
     memset(&serverAddr, '\0', sizeof(serverAddr));
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(PORT);
-    serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    // serverAddr.sin_family = AF_INET;
+    // serverAddr.sin_port = htons(PORT);
+    //serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    // serverAddr.sin_addr.s_addr = inet_addr("10.6.101.255");
+    // serverAddr.sin_addr.s_addr = inet_addr(INADDR_ANY);
+	// assign IP, PORT 
+	serverAddr.sin_family = AF_INET; 
+	serverAddr.sin_addr.s_addr = htonl(INADDR_ANY); 
+	serverAddr.sin_port = htons(PORT); 
+    
+
 
     ret = bind(sockfd, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
     if(ret < 0){
