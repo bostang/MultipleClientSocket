@@ -15,10 +15,10 @@ EL4236 Perancangan Perangkat Lunak Jaringan 2023/2024
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/socket.h>
+#include <sys/socket.h>     // Linux-only, use Winsock2 for Windows
 #include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include <netinet/in.h>     // Linux-only
+#include <arpa/inet.h>      // Linux-only
 
 // DEKLARASI KONSTANTA
 #define PORT 4567
