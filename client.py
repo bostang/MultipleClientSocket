@@ -12,7 +12,7 @@ import socket
 
 # HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
 HOST = '10.6.101.147' # Current IPv4 server  
-PORT = 4567        # Port to listen on (non-privileged ports are > 1023)
+PORT = 4568        # Port to listen on (non-privileged ports are > 1023)
 MAX_BUFFER_SIZE = 80
 
 def handle_connection(sockfd):
@@ -26,7 +26,7 @@ def handle_connection(sockfd):
            if response != "selesai":
             print("Server:", response)
 
-           if response.startswith("selesai"):
+           if response.startswith("Client"):
                print("Memutus koneksi...")
                break
 
